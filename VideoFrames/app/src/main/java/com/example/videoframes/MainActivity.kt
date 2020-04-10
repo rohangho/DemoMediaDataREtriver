@@ -38,6 +38,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private var seek1: SeekBar? = null
     private var downLoadButton: Button?=null
+    private var filterOne: Button? = null
+    private var filterTwo: Button? = null
+    private var filterThree: Button? = null
     private var seek2: SeekBar? = null
     private var allAdapter: RecyclerAdapter? = null
     var bitmapper1 = ArrayList<Bitmap>()
@@ -54,6 +57,9 @@ class MainActivity : AppCompatActivity() {
         seek1 = findViewById(R.id.firstProgress)
         seek2 = findViewById(R.id.secondProgress)
         abc = findViewById(R.id.surfaceView)
+        filterOne = findViewById(R.id.filter1)
+        filterTwo = findViewById(R.id.filter2)
+        filterThree = findViewById(R.id.filter3)
         downLoadButton= findViewById(R.id.button)
         downLoadButton?.setOnClickListener {
             sendWorkMAnager(bitmapper1)

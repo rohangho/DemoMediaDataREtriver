@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">VideoFrames</string>
+    <string name="download_trimmed_video">Download Trimmed Video</string>
+    <string name="filter_1">Filter-1</string>
+    <string name="filter_2">Filter-2</string>
+    <string name="filter_3">Filter-3</string>
 </resources>
