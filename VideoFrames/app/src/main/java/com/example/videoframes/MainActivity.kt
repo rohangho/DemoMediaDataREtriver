@@ -228,9 +228,9 @@ class MainActivity : AppCompatActivity() {
 
             while (i < maxDur) {
                 if (filter != 0)
-                    bitmapper.add(filterType.processFilter(getResizedBitmap(mediaMetadataRetriever.getFrameAtTime(i), 60)))
+                    bitmapper.add(filterType.processFilter(getResizedBitmap(mediaMetadataRetriever.getFrameAtTime(i), 50)))
                 else
-                    bitmapper.add(getResizedBitmap(mediaMetadataRetriever.getFrameAtTime(i), 60))
+                    bitmapper.add(getResizedBitmap(mediaMetadataRetriever.getFrameAtTime(i), 50))
 
 
                 i = i + maxDur / 10
@@ -292,7 +292,7 @@ class MainActivity : AppCompatActivity() {
 
     fun BitMapToString(bitmap: Bitmap): String {
         val baos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 80, baos)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
         val b = baos.toByteArray()
         return Base64.encodeToString(b, Base64.DEFAULT)
     }
