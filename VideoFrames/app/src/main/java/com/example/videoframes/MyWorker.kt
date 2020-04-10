@@ -27,7 +27,9 @@ class MyWorker(context: Context, params: WorkerParameters) :
         }
     }
 
-
+    /**
+     * Convert Bitmpa to strinf
+     */
 
     fun StringToBitMap(encodedString: String?): Bitmap? {
         return try {
@@ -39,13 +41,16 @@ class MyWorker(context: Context, params: WorkerParameters) :
         }
     }
 
+    /**
+     * Save in a directory
+     */
     private fun createDirectoryAndSaveFile(imageToSave: Bitmap, fileName: String) {
-        val direct = File(Environment.getExternalStorageDirectory().toString() + "/DirName")
+        val direct = File(Environment.getExternalStorageDirectory().toString() + "/EditedImage")
         if (!direct.exists()) {
-            val wallpaperDirectory = File("/sdcard/DirName/")
+            val wallpaperDirectory = File("/sdcard/EditedImage/")
             wallpaperDirectory.mkdirs()
         }
-        val file = File("/sdcard/DirName/", fileName + ".jpg")
+        val file = File("/sdcard/EditedImage/", fileName + ".jpg")
         if (file.exists()) {
             file.delete()
         }

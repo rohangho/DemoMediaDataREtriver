@@ -7,11 +7,11 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.util.Base64
 import android.widget.Button
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
+import android.widget.Toast
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -21,13 +21,13 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.zomato.photofilters.FilterPack
+import com.zomato.photofilters.imageprocessors.Filter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
 import java.util.*
 
 
@@ -50,6 +50,12 @@ class MainActivity : AppCompatActivity() {
     private var starter: Int = 0
     private var ender: Int = 100
     val uiScope = CoroutineScope(Dispatchers.Main)
+    private var filter: Int = 0
+    lateinit var filterType: Filter
+
+    init {
+        System.loadLibrary("NativeImageProcessor")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,10 +68,31 @@ class MainActivity : AppCompatActivity() {
         filterThree = findViewById(R.id.filter3)
         downLoadButton= findViewById(R.id.button)
         downLoadButton?.setOnClickListener {
+
+            Toast.makeText(this, "Downloading Started .. you can put the app in background", Toast.LENGTH_SHORT)
             sendWorkMAnager(bitmapper1)
+
         }
         recyclerView = findViewById(R.id.recicler)
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        filterOne?.setOnClickListener {
+            filter = 1
+            filterType = FilterPack.getClarendon(this)
+            startRetriverWork()
+            Toast.makeText(this, "Filter Applied ... Press download to download frames", Toast.LENGTH_SHORT)
+        }
+        filterTwo?.setOnClickListener {
+            filter = 2
+            filterType = FilterPack.getAmazonFilter(this)
+            startRetriverWork()
+            Toast.makeText(this, "Filter Applied ... Press download to download frames", Toast.LENGTH_SHORT)
+        }
+        filterThree?.setOnClickListener {
+            filter = 3
+            filterType = FilterPack.getBlueMessFilter(this)
+            startRetriverWork()
+            Toast.makeText(this, "Filter Applied ... Press download to download frames", Toast.LENGTH_SHORT)
+        }
 
         seek1?.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -200,7 +227,12 @@ class MainActivity : AppCompatActivity() {
             var i: Long = (starter * maxDur) / 100
 
             while (i < maxDur) {
-                bitmapper.add(getResizedBitmap(mediaMetadataRetriever.getFrameAtTime(i), 60))
+                if (filter != 0)
+                    bitmapper.add(filterType.processFilter(getResizedBitmap(mediaMetadataRetriever.getFrameAtTime(i), 60)))
+                else
+                    bitmapper.add(getResizedBitmap(mediaMetadataRetriever.getFrameAtTime(i), 60))
+
+
                 i = i + maxDur / 10
             }
 
@@ -208,11 +240,16 @@ class MainActivity : AppCompatActivity() {
               bitmapper1=bitmapper
                 allAdapter = RecyclerAdapter(bitmapper, applicationContext)
                 recyclerView.adapter = allAdapter
+                mediaMetadataRetriever.release()
             }
         }
 
+
     }
 
+    /**
+     * To create a queue of work for workMAnager
+     */
     private fun sendWorkMAnager(bitmapper: ArrayList<Bitmap>) {
         var abc = arrayOfNulls<String>(bitmapper.size)
         val data = Data.Builder()
@@ -230,25 +267,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun createDirectoryAndSaveFile(imageToSave: Bitmap, fileName: String) {
-        val direct = File(Environment.getExternalStorageDirectory().absolutePath.toString() + "/frames")
-        if (!direct.exists()) {
-            val wallpaperDirectory = File("/sdcard/frames/")
-            wallpaperDirectory.mkdirs()
-        }
-        val file = File( "frames")
-        if (file.exists()) {
-            file.delete()
-        }
-        try {
-            val out = FileOutputStream(file)
-            imageToSave.compress(Bitmap.CompressFormat.JPEG, 100, out)
-            out.flush()
-            out.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
 
 
     /**
@@ -267,6 +285,10 @@ class MainActivity : AppCompatActivity() {
         }
         return Bitmap.createScaledBitmap(image, width, height, true)
     }
+
+    /**
+     * Convert bitmap to string
+     */
 
     fun BitMapToString(bitmap: Bitmap): String {
         val baos = ByteArrayOutputStream()

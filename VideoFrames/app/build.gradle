@@ -52,6 +52,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.3.4"
     implementation "android.arch.work:work-runtime:2.3.4"
     implementation 'info.androidhive:imagefilters:1.0.7'
+    implementation 'com.karumi:dexter:4.1.0'
 
 
 }

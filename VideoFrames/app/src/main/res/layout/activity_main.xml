@@ -18,35 +18,31 @@
 
     <Button
         android:id="@+id/filter1"
-        android:layout_width="wrap_content"
+        android:layout_width="87dp"
         android:layout_height="wrap_content"
         android:text="@string/filter_1"
-        app:layout_constraintBottom_toTopOf="@+id/surfaceView"
-        app:layout_constraintEnd_toStartOf="@+id/filter2"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button"
+        app:layout_constraintBottom_toTopOf="@+id/surfaceView" />
 
     <Button
         android:id="@+id/filter2"
-        android:layout_width="wrap_content"
+        android:layout_width="87dp"
         android:layout_height="wrap_content"
         android:text="@string/filter_2"
-        app:layout_constraintBottom_toTopOf="@+id/surfaceView"
-        app:layout_constraintEnd_toStartOf="@+id/filter3"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/filter1"
-        app:layout_constraintTop_toBottomOf="@+id/button" />
+        app:layout_constraintEnd_toEndOf="@id/button"
+        app:layout_constraintStart_toStartOf="@id/button"
+        app:layout_constraintTop_toBottomOf="@id/button"
+        app:layout_constraintBottom_toTopOf="@+id/surfaceView" />
 
     <Button
         android:id="@+id/filter3"
-        android:layout_width="wrap_content"
+        android:layout_width="88dp"
         android:layout_height="wrap_content"
         android:text="@string/filter_3"
-        app:layout_constraintBottom_toTopOf="@+id/surfaceView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/filter2" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button"
+        app:layout_constraintBottom_toTopOf="@+id/surfaceView" />
 
 
     <VideoView
