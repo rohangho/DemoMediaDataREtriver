@@ -9,9 +9,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Base64
-import android.util.Base64.DEFAULT
-import android.util.Base64.encodeToString
-import android.view.View
 import android.widget.Button
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
@@ -45,21 +42,21 @@ class MainActivity : AppCompatActivity() {
     private var allAdapter: RecyclerAdapter? = null
     var bitmapper1 = ArrayList<Bitmap>()
 
-    private var a: Int = 0;
-    private var b: Int = 100;
-    private var starter: Int = 0;
-    private var ender: Int = 100;
+    private var a: Int = 0
+    private var b: Int = 100
+    private var starter: Int = 0
+    private var ender: Int = 100
     val uiScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        seek1 = findViewById(R.id.firstProgress);
-        seek2 = findViewById(R.id.secondProgress);
+        seek1 = findViewById(R.id.firstProgress)
+        seek2 = findViewById(R.id.secondProgress)
         abc = findViewById(R.id.surfaceView)
         downLoadButton= findViewById(R.id.button)
         downLoadButton?.setOnClickListener {
-            sendWorkMAnager(bitmapper1);
+            sendWorkMAnager(bitmapper1)
         }
         recyclerView = findViewById(R.id.recicler)
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -188,7 +185,7 @@ class MainActivity : AppCompatActivity() {
     private suspend fun processBitmap(mediaMetadataRetriever: MediaMetadataRetriever) {
         withContext(Dispatchers.Default) {
             val bitmapper = ArrayList<Bitmap>()
-            val DURATION = mediaMetadataRetriever!!.extractMetadata(
+            val DURATION = mediaMetadataRetriever.extractMetadata(
                     MediaMetadataRetriever.METADATA_KEY_DURATION)
 
             var maxDur = (1000 * DURATION.toDouble()).toLong()
@@ -197,36 +194,38 @@ class MainActivity : AppCompatActivity() {
             var i: Long = (starter * maxDur) / 100
 
             while (i < maxDur) {
-                bitmapper.add(getResizedBitmap(mediaMetadataRetriever!!.getFrameAtTime(i), 60))
+                bitmapper.add(getResizedBitmap(mediaMetadataRetriever.getFrameAtTime(i), 60))
                 i = i + maxDur / 10
             }
 
             withContext(Dispatchers.Main) {
               bitmapper1=bitmapper
                 allAdapter = RecyclerAdapter(bitmapper, applicationContext)
-                recyclerView!!.adapter = allAdapter
+                recyclerView.adapter = allAdapter
             }
         }
 
     }
 
     private fun sendWorkMAnager(bitmapper: ArrayList<Bitmap>) {
-//        var abc = arrayOfNulls<String>(bitmapper.size)
-//        val data = Data.Builder()
+        var abc = arrayOfNulls<String>(bitmapper.size)
+        val data = Data.Builder()
         var i = 0
         while (i < bitmapper.size) {
-            createDirectoryAndSaveFile(bitmapper.get(i),Integer.toString(i))
-            i++;
+//            createDirectoryAndSaveFile(bitmapper.get(i),Integer.toString(i))
+            abc[i] = BitMapToString(bitmapper.get(i))
+            data.putString("array", abc[i])
+            val workRequest = OneTimeWorkRequestBuilder<MyWorker>().setInputData(data.build())
+                    .build()
+            WorkManager.getInstance(this@MainActivity).enqueue(workRequest)
+            i++
         }
-//        data.putStringArray("array", abc);
-//        val workRequest = OneTimeWorkRequestBuilder<MyWorker>().setInputData(data.build())
-//                .build()
-//        WorkManager.getInstance(this@MainActivity).enqueue(workRequest)
+
 
     }
 
     private fun createDirectoryAndSaveFile(imageToSave: Bitmap, fileName: String) {
-        val direct = File(Environment.getExternalStorageDirectory().getAbsolutePath().toString() + "/frames")
+        val direct = File(Environment.getExternalStorageDirectory().absolutePath.toString() + "/frames")
         if (!direct.exists()) {
             val wallpaperDirectory = File("/sdcard/frames/")
             wallpaperDirectory.mkdirs()

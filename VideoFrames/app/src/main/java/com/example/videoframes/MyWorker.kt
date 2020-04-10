@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.os.Environment
 import android.util.Base64
 import androidx.work.CoroutineWorker
-import androidx.work.Worker
 import androidx.work.WorkerParameters
 import java.io.File
 import java.io.FileOutputStream
@@ -15,12 +14,12 @@ class MyWorker(context: Context, params: WorkerParameters) :
         CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         return try {
-            val name =  inputData.getStringArray("array")
-            val i=0;
+            val name = inputData.getString("array")
+            val i = 0
             if (name != null) {
-                while(i<name.size){
-                    StringToBitMap(name[i])?.let { createDirectoryAndSaveFile(it,"1") }
-                }
+
+                StringToBitMap(name)?.let { createDirectoryAndSaveFile(it, java.sql.Timestamp(System.currentTimeMillis()).toString()) }
+
             }
             Result.success()
         } catch (error: Throwable) {
@@ -46,7 +45,7 @@ class MyWorker(context: Context, params: WorkerParameters) :
             val wallpaperDirectory = File("/sdcard/DirName/")
             wallpaperDirectory.mkdirs()
         }
-        val file = File("/sdcard/DirName/", fileName)
+        val file = File("/sdcard/DirName/", fileName + ".jpg")
         if (file.exists()) {
             file.delete()
         }
