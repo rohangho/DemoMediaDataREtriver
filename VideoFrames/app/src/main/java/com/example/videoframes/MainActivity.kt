@@ -1,11 +1,16 @@
 package com.example.videoframes
 
 import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Base64
 import android.widget.Button
@@ -15,6 +20,8 @@ import android.widget.Toast
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,7 +51,7 @@ class MainActivity : AppCompatActivity() {
     private var seek2: SeekBar? = null
     private var allAdapter: RecyclerAdapter? = null
     var bitmapper1 = ArrayList<Bitmap>()
-
+    private var downloadCounter: Int = 0
     private var a: Int = 0
     private var b: Int = 100
     private var starter: Int = 0
@@ -52,6 +59,16 @@ class MainActivity : AppCompatActivity() {
     val uiScope = CoroutineScope(Dispatchers.Main)
     private var filter: Int = 0
     lateinit var filterType: Filter
+    private lateinit var mNotifyManager: NotificationManagerCompat
+
+    val CHANNEL_ID = "1001"
+    val notificationId = 1001
+    val builder = NotificationCompat.Builder(this, CHANNEL_ID).apply {
+        setContentTitle("Picture Download")
+        setContentText("Download in progress")
+        setSmallIcon(R.drawable.ic_launcher_foreground)
+        priority = NotificationCompat.PRIORITY_MAX
+    }
 
     init {
         System.loadLibrary("NativeImageProcessor")
@@ -60,6 +77,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        mNotifyManager = NotificationManagerCompat.from(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            createNotificatonChannel()
         seek1 = findViewById(R.id.firstProgress)
         seek2 = findViewById(R.id.secondProgress)
         abc = findViewById(R.id.surfaceView)
@@ -125,6 +145,14 @@ class MainActivity : AppCompatActivity() {
         })
 
         permisssion
+    }
+
+    private fun createNotificatonChannel() {
+        val id = CHANNEL_ID
+        val notificationChannel = NotificationChannel(id, "Progress", NotificationManager.IMPORTANCE_LOW)
+        notificationChannel.lightColor = Color.BLUE
+        notificationChannel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        mNotifyManager.createNotificationChannel(notificationChannel)
     }
 
     fun changeInFrames() {
@@ -254,15 +282,27 @@ class MainActivity : AppCompatActivity() {
         var abc = arrayOfNulls<String>(bitmapper.size)
         val data = Data.Builder()
         var i = 0
+        builder.setProgress(100, 0, false)
+        mNotifyManager.notify(notificationId, builder.build())
         while (i < bitmapper.size) {
 //            createDirectoryAndSaveFile(bitmapper.get(i),Integer.toString(i))
             abc[i] = BitMapToString(bitmapper.get(i))
             data.putString("array", abc[i])
             val workRequest = OneTimeWorkRequestBuilder<MyWorker>().setInputData(data.build())
                     .build()
-            WorkManager.getInstance(this@MainActivity).enqueue(workRequest)
+            val workMAgerDemo = WorkManager.getInstance(this@MainActivity).enqueue(workRequest)
+            if (workMAgerDemo.result.isDone) {
+                downloadCounter++
+                builder.setProgress(100, downloadCounter * 10, false)
+                mNotifyManager.notify(notificationId, builder.build())
+
+            }
+
             i++
         }
+        builder.setContentText("Download complete")
+                .setProgress(0, 0, false)
+        mNotifyManager.notify(notificationId, builder.build())
 
 
     }
